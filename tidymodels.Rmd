@@ -1,0 +1,116 @@
+---
+title: "Machine Learning-The Tidy way"
+author: "Saurav Ghosh"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output:
+  slidy_presentation: default
+  ioslides_presentation: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Disclaimer
+
+This is *not* a comprehensive overview of predictive modeling (*a.k.a.* supervised machine learning)
+
+This *is* a very high-level overview of the predictive modeling process and what's possible using the new `tidymodels` universe of R packages
+
+For more information, see [tidymodels GitHub](https://github.com/tidymodels).
+
+## Packages in tidymodels
+
+* rsample - data sampling
+* recipes - data pre-processing
+* parsnip - unified modeling interface  
+* yardstick - measuring model performance  
+* dials - hyperparameter tuning
+
+```{r,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(tidymodels)
+library(caret) # For the dataset Sacramento
+library(ranger) # For running Random forest algorithm
+```
+
+## Data sampling using rsample
+
+Data can be split in two ways:
+
+* **Training dataset** is used to estimate model parameters
+* **Testing dataset** is used to estimate model predictive performance
+
+## Data pre-processing using recipes
+
+Once we have training and testing data, we may need to do some data pre-processing before we can fit models. Examples include:  
+
+* Data transformations, such as centering and scaling to put variables in same units  
+* Removing correlated variables  
+* Encoding or creating dummy variables  
+* Imputing missing data
+
+## Steps to pre-process
+
+* Basic function for initiating recipe is `recipes::recipe`  
+
+-- *for example*, `housing_recipe <- recipe(price ~. data = housing_training)`
+
+* We can then add steps to the recipe using pipes
+
+-- *for example*, `step_corr()`, `step_center()`, `step_scale()`, ` step_dummy()`, `step_meanimpute()`
+
+* For each step, can specify whether we what type of variables we want step to act on  
+
+-- *for example*, `all_numeric()`, `all_outcomes()`, `all_predictors()`, or `dplyr` verbs like `starts_with`, `contains`, etc.
+
+## Model training using parsnip
+
+* Separate the definition of a model from its evaluation.
+* Decouple the model specification from the implementation (whether the implementation is in R, spark, or something else). For example, the user would call rand_forest instead of ranger::ranger or other specific packages.
+
+`rand_forest(mtry = 12, trees = 2000) %>%
+  set_engine("ranger", importance = 'impurity') %>%
+  fit(y ~ ., data = dat)`
+
+`rand_forest(mtry = 12, trees = 2000) %>%
+  set_engine("spark") %>%
+  fit(y ~ ., data = dat)`
+
+## Models in parsnip
+
+* Classification
+    + boost_tree()
+    + decision_tree()
+    + logistic_reg()
+    + ...and many morre
+* Regression
+    + boost_tree()
+    + decision_tree()
+    + linear_reg()
+    + ...and many morre
+* Supported engines
+    + glm, glmnet
+    + keras
+    + lm
+    + randomForest,ranger,rpart
+
+## Testing model performance using yardstick
+
+Once we've trained the model(s), its time to test how well the models work.
+
+* The function `metrics` generates a default metric set using dataframe of `truth` and `estimate` columns
+-- For regression, these are RMSE, R-squared, and MAE
+* Can define custom sets of metrics using `metric_set`  
+
+* Can use individual functions for all metric types (*e.g.*, `rsq`, `accuracy`, `roc_auc`, `precision`, etc)  
+
+* Can generate ROC and precision recall curves using `roc_curve`, `pr_curve`
+
+
+## Demo time!!
+
+
+    
+
